@@ -52,7 +52,7 @@ type FormValues = z.infer<typeof fullSchema>;
 
 // --- Component ---
 export default function MultiStepFormRHF() {
-    const [categories, setCategories] = useState<string[]>([]);
+    const [categories, setCategories] = useState<string[]>(['a', 'b']);
     const steps = ['Basic Info', 'Additional Info', 'Contact Info', 'Description', 'Summary'];
     const stepFields: (keyof FormValues)[][] = [
         ['firstName', 'lastName', 'category'],
