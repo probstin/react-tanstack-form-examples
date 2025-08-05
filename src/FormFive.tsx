@@ -1,37 +1,45 @@
+// FormExample.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import { Box, Button } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
+import { AutocompleteElement, SelectElement } from 'react-hook-form-mui';
 import { z } from 'zod';
-import { AsyncAutocomplete } from './components/forms/MuiRhfAutocomplete';
-import { AsyncSelect } from './components/forms/MuiRhfSelect';
-import { DevTool } from '@hookform/devtools';
 
-const optionSchema = z.object({
-    id: z.number(),
-    label: z.string(),
+const schema = z.object({
+    country: z.coerce.number().min(1, 'Country is required'),
+    resort: z.coerce.number().min(1, 'Resort is required'),
 });
 
-const formSchema = z.object({
-    country: z.number().min(1, 'Country is required'),
-    resort: z.number().min(1, 'Resort is required'),
-});
+type FormValues = z.infer<typeof schema>;
 
-const fetchResorts = async (input: string): Promise<Option[]> => {
-    const res = await fetch(`http://localhost:3001/api/pick-lists/resorts?q=${encodeURIComponent(input)}`);
-    return res.json();
+const fetchCountries = async () => {
+    const res = await fetch('http://localhost:3001/api/pick-lists/countries');
+    return res.json() as Promise<{ id: number; label: string }[]>;
 };
 
-type FormValues = z.infer<typeof formSchema>;
-type Option = z.infer<typeof optionSchema>;
+const fetchResorts = async () => {
+    const res = await fetch('http://localhost:3001/api/pick-lists/resorts');
+    return res.json() as Promise<{ id: number; label: string }[]>;
+};
 
-function FormFive(): React.ReactElement {
+export function FormFive() {
     const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(schema),
         defaultValues: {
-            country: undefined,
-            resort: undefined,
+            country: '',
+            resort: '',
         },
+    });
+
+    const { data: countries = [], isLoading: loadingCountries } = useQuery({
+        queryKey: ['countries'],
+        queryFn: fetchCountries,
+    });
+
+    const { data: resorts = [], isLoading: loadingResorts } = useQuery({
+        queryKey: ['resorts'],
+        queryFn: fetchResorts,
     });
 
     const onSubmit = (data: FormValues) => {
@@ -39,39 +47,36 @@ function FormFive(): React.ReactElement {
     };
 
     return (
-        <>
-            <DevTool control={form.control} />
-            <FormProvider {...form}>
-                <Box
-                    component="form"
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    noValidate
-                    sx={{ mt: 2 }}
-                >
-                    <AsyncSelect<Option>
-                        name="country"
-                        label="Country"
-                        fetchOptions={() => fetch('http://localhost:3001/api/pick-lists/countries').then((res) => res.json())}
-                        getOptionLabel={(o) => o.label}
-                        getOptionValue={(o) => o.id}
-                        formScope="user-edit-form"
-                        initialOptions={[]}
-                    />
-                    <AsyncAutocomplete<Option>
-                        name="resort"
-                        label="Resort"
-                        fetchOptions={fetchResorts}
-                        getOptionLabel={(o) => o.label}
-                        getOptionValue={(o) => o.id}
-                        isOptionEqualToValue={(a, b) => a.id === b.id}
-                    />
-                    <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                        Submit
-                    </Button>
-                </Box>
-            </FormProvider>
-        </>
+        <FormProvider {...form}>
+            <Box
+                component="form"
+                onSubmit={form.handleSubmit(onSubmit)}
+                noValidate
+                sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}
+            >
+                <SelectElement
+                    name="country"
+                    label="Country"
+                    options={countries.map((c) => ({ id: c.id, label: c.label }))}
+                    valueKey="id"
+                    labelKey="label"
+                    fullWidth
+                    required
+                />
+
+                <AutocompleteElement
+                    name="resort"
+                    label="Resort"
+                    options={resorts}
+                    loading={loadingResorts}
+                    matchId
+                    textFieldProps={{ sx: { mt: 2 }, fullWidth: true }}
+                />
+
+                <Button type="submit" variant="contained" sx={{ mt: 3 }}>
+                    Submit
+                </Button>
+            </Box>
+        </FormProvider>
     );
 }
-
-export default FormFive;
