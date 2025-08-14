@@ -15,16 +15,21 @@ const countries = [
 ];
 
 const resorts = [
-    { id: 101, label: 'Blue Mountain Resort', value: 'BMR' },
-    { id: 102, label: 'Aspen Snowmass', value: 'AS' },
-    { id: 103, label: 'Whistler Blackcomb', value: 'WB' },
-    { id: 104, label: 'Zermatt Resort', value: 'ZR' },
-    { id: 105, label: 'Niseko United', value: 'NU' },
+    { id: 101, label: 'Blue Mountain Resort', resortCode: 'BMR' },
+    { id: 102, label: 'Aspen Snowmass', resortCode: 'AS' },
+    { id: 103, label: 'Whistler Blackcomb', resortCode: 'WB' },
+    { id: 104, label: 'Zermatt Resort', resortCode: 'ZR' },
+    { id: 105, label: 'Niseko United', resortCode: 'NU' },
+    { id: 106, label: 'Nicama United', resortCode: 'NIC' },
 ];
 
 // Return all countries (no filter needed)
 app.get('/api/pick-lists/countries', (req, res) => {
     res.json(countries);
+});
+
+app.get('/api/advertisement', (req, res) => {
+    res.json({ resortCode: "BMR", advertisementName: "My Custom Name" });
 });
 
 // Return resorts filtered by ?q=
