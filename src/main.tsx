@@ -12,16 +12,19 @@ import {
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { AuthNProvider } from './AuthNProvider.tsx';
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <QueryClientProvider client={queryClient}>
-        <CssBaseline />
-        <App />
-      </QueryClientProvider>
-    </LocalizationProvider>
+    <AuthNProvider>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <QueryClientProvider client={queryClient}>
+          <CssBaseline />
+          <App />
+        </QueryClientProvider>
+      </LocalizationProvider>
+    </AuthNProvider>
   </StrictMode>,
 )
